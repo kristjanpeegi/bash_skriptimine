@@ -1,0 +1,27 @@
+#Skript mis võtab ühest failist kasutajanime ja teisest failist paroolid ning loob nende abil lokaalse konto
+
+if [ $# -ne 2 ]; then
+	echo "Vale sisend! Kasutusjuhend: $0 #kasutajanimed# #paroolid#"
+	exit
+fi
+
+kasutajad=$1
+paroolid=$2
+paste -d":" $kasutajad $paroolid > ajutine.txt
+
+if [ -f $kasutajad -a -r $kasutajad ] && [ -f $paroolid -a -r $paroolid ]; then
+	echo "Failid $kasutajad ja $paroolid on korras!"
+
+        for  kasutaja in $(cat $kasutajad); do 
+        useradd $kasutaja -m -s /bin/bash
+        done
+
+        for parool in $(cat ajutine.txt); do
+        echo $parool | chpasswd
+        kasutajanimi=$(echo $parool | cut -f1 -d":")
+        echo "Kasutaja $kasutajanimi on edukalt loodud ja kaitstud koos parooliga!"
+        done
+        rm ajutine.txt
+        else
+        echo "Viga failide lugemisel!"
+fi
