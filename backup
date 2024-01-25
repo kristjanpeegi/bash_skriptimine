@@ -1,0 +1,30 @@
+#!/bin/bash
+#Määrab mis kasutaga skript tööd teeb
+backup_base="/home"
+backup_dir_suffix="_bcp"
+
+# Liigub skripti kataloogi
+cd "$(dirname "$0")"
+
+# Arhiveerib ja pakib iga kasutaja kodukataloogi
+for user_home in "$backup_base"/*; do
+    if [ -d "$user_home" ]; then
+        user=$(basename "$user_home")
+        backup_dir="$backup_base/home_bcp/$user$backup_dir_suffix"
+        mkdir -p "$backup_dir"
+
+        backup_file="$backup_dir/$user.$(date +"%d.%m.%Y").tar.gz"
+
+        # Kasutaja kodukataloogi arhiveerimine ilma üksikasjaliku loendita
+        tar -czf "$backup_file" --directory="$backup_base" --exclude="$backup_dir" "$user"
+
+        # Muuda faili õigused vastavalt vajadusele
+        chown root:root "$backup_file"
+        chmod 600 "$backup_file"
+#Väljastab teate, et varundamine oli edukas.
+        echo "Kasutaja $user kodukataloogi varundamine lõpetatud."
+    fi
+done
+
+echo "Kõikide kasutajate kodukataloogide varundamine lõpetatud."
+
